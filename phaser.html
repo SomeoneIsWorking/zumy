@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<style>
 			body {
 				background: url("assets/sky-background.svg");
@@ -63,6 +64,10 @@
 				balls.push(new Ball(common.dimensions.width/2,50));
 				game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 				game.stage.backgroundColor = "#EEE";
+				
+				game.input.onDown.add(function(pointer){
+					balls.push(new Ball(pointer.x,pointer.y));
+				}, this);
 			}
 
 			function update() {
