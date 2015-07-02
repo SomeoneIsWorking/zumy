@@ -65,7 +65,7 @@
 				game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 				game.stage.backgroundColor = "#EEE";
 				
-				game.input.onDown.add(function(pointer){
+				game.input.onTap.add(function(pointer){
 					balls.push(new Ball(pointer.x,pointer.y));
 				}, this);
 			}
