@@ -1,0 +1,97 @@
+<html>
+  <head>
+	<script src="js/common.js"></script>
+    <script src="js/createjs-2015.05.21.min.js"></script>
+	<style>
+		body {
+			background: url("assets/sky-background.svg");
+			margin:0;
+		}
+		canvas{
+			background:white;
+		}
+	</style>
+  </head>
+  <body>
+    <canvas id="demoCanvas"></canvas>
+  </body>
+  <script>	
+	var canvas = document.getElementById("demoCanvas");
+	var stage, loader, ballSpriteSheet,balls = [];
+	var ballColors = ["#FBA","#ABF"];
+	common.resizeWithWindow(canvas);
+	
+	function Ball(x, y, color){
+		this.speed = 200; this.rotation = 0; this.x = x; this.y = y; this.nodes = {}; this.color = color ? color : 1;
+		this.nodes.circle = new createjs.Shape();
+		this.nodes.circle.graphics.beginFill(ballColors[this.color]).drawCircle(0, 0, 32);
+		this.nodes.ball = new createjs.Sprite(ballSpriteSheet,"run");
+		this.Move = function(coord){
+			var x = coord.x ? coord.x : (coord.xoff ? (this.x + coord.xoff) : this.x);
+			var y = coord.y ? coord.y : (coord.yoff ? (this.y + coord.yoff) : this.y);
+			this.x = x;
+			this.y = y;
+			for(var key in this.nodes){
+				this.nodes[key].set({x:x,y:y});
+			}
+		};
+		
+		this.Move({x:x,y:y});
+		
+		this.tick = function(delta){
+			this.nodes.ball.rotation = this.rotation*180/Math.PI;
+			this.nodes.ball.framerate = this.speed/2;
+			this.rotation += delta;
+			this.Move({
+				xoff: this.speed * delta * Math.cos(this.rotation),
+				yoff: this.speed * delta * Math.sin(this.rotation)
+			})
+		}
+		
+		for(var key in this.nodes){
+			stage.addChild(this.nodes[key]);
+		}
+	}
+	
+    function init() {	  
+		canvas.width = common.dimensions.width;
+		canvas.height = common.dimensions.height;
+		manifest = [
+			{src: "ballsa.png", id: "ball"}
+		];
+
+		loader = new createjs.LoadQueue(false);
+		loader.addEventListener("complete", handleComplete);
+		loader.loadManifest(manifest, true, "./zaz/data/");
+    }
+	var text;
+	function handleComplete(){
+		stage = new createjs.Stage("demoCanvas");
+		ballSpriteSheet = new createjs.SpriteSheet({
+			framerate: 60,
+			"images": [loader.getResult("ball")],
+			"frames": {"regX": 32, "height": 64, "regY": 32, "width": 64},
+			"animations": {
+				"run": [0, 63, "run"]
+			}
+		});
+		balls.push(new Ball(common.dimensions.width/2,50));
+		createjs.Ticker.timingMode = createjs.Ticker.RAF;
+	    createjs.Ticker.addEventListener("tick", tick);
+		text = new createjs.Text("Hello World", "20px Arial", "#ff7700");
+		stage.addChild(text);
+	}
+	
+	function tick(event){
+		if (event.delta > 200) return;
+		
+		balls.forEach(function(ele){
+			ele.tick(event.delta / 1000);
+		});
+		
+		stage.update(event);
+	}
+	
+	document.body.onload = init;
+  </script>
+</html>

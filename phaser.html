@@ -1,0 +1,76 @@
+<html>
+	<head>
+		<style>
+			body {
+				background: url("assets/sky-background.svg");
+				margin:0;
+			}
+			canvas{
+				background:white;
+			}
+		</style>
+		
+	</head>
+	<body>
+		<div id="game"></div>		
+		
+		<script src="js/phaser.min.js"></script>
+		<script src="js/common.js"></script>
+		<script>
+			var gamediv = document.getElementById("game");
+			common.resizeWithWindow(gamediv);
+		
+			var game = new Phaser.Game(common.dimensions.width, common.dimensions.height, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
+			var balls = [];
+			var ballColors = [0xaaffaa,0xffaaff];		
+			
+			function Ball(x, y, color){		
+				this.speed = 200; this.rotation = 0; this.x = x; this.y = y; this.nodes = {}; this.color = color ? color : 0;
+				var ball = game.add.sprite(0, 0, 'ball');
+				ball.animations.add("roll").play(null,true);
+				ball.tint = ballColors[this.color];
+				ball.anchor.setTo(0.5, 0.5);
+				this.nodes.ball = ball;
+				this.Move = function(coord){
+					var x = coord.x ? coord.x : (coord.xoff ? (this.x + coord.xoff) : this.x);
+					var y = coord.y ? coord.y : (coord.yoff ? (this.y + coord.yoff) : this.y);
+					this.x = x;
+					this.y = y;
+					for(var key in this.nodes){
+						this.nodes[key].x = x;
+						this.nodes[key].y = y;
+					}
+				};
+				
+				this.Move({x:x,y:y});
+				
+				this.tick = function(delta){
+					this.nodes.ball.rotation = this.rotation;
+					this.nodes.ball.animations.currentAnim.speed = this.speed/2;
+					this.rotation += delta;
+					this.Move({
+						xoff: this.speed * delta * Math.cos(this.rotation),
+						yoff: this.speed * delta * Math.sin(this.rotation)
+					})
+				}
+			}
+
+			function preload() {
+				game.load.spritesheet('ball', 'zaz/data/balls2.png',64,64);
+			}
+
+			function create() {
+				balls.push(new Ball(common.dimensions.width/2,50));
+				game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+				game.stage.backgroundColor = "#EEE";
+			}
+
+			function update() {
+			if (game.time.elapsed > 100) return;
+				balls.forEach(function(ele){
+					ele.tick(game.time.elapsed / 1000);
+				});
+			}
+		</script>
+	</body>
+</html>
